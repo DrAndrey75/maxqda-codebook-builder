@@ -1,126 +1,123 @@
-# MAXQDA Codebook Builder (LLM‑free)
+# MAXQDA Codebook Builder (LLM-free)
 
-## Цель и задача
-Этот проект автоматизирует подготовку **словаря/кодовой таблицы для MAXQDA** на основе:
-1) большого исходного кодбука (XLSX) и  
-2) локального корпуса документов (PDF/TXT).
+Offline Python pipeline that builds a MAXQDA-ready dictionary/codebook from an XLSX codebook and a local PDF/TXT corpus (abbreviation mining + exact matching).
 
-Задача инструмента — **быстро собрать “рабочий” словарь для лексического поиска в MAXQDA**, оставив только те термины (и их варианты/аббревиатуры), которые реально встречаются в ваших документах, и сохранить результат в формате, удобном для импорта в MAXQDA.
+## Goal and scope
+This project automates preparing a **MAXQDA import file** from:
+1) a large source codebook (`.xlsx`), and
+2) a local document corpus (`.pdf` / `.txt`).
 
-## Суть проекта (что делает)
-Проект — это **офлайн‑пайплайн** (без LLM и без внешних API по умолчанию), который:
-- нормализует и расширяет кодбук (варианты написания, скобки, дефисы, “MeSH‑подобные” конструкции),
-- извлекает и агрегирует аббревиатуры из PDF‑корпуса (Schwartz & Hearst‑подобные эвристики),
-- при необходимости обогащает кодбук аббревиатурами (в т.ч. для ветки химии),
-- выполняет **точное сопоставление** (exact match) терминов кодбука с текстами документов,
-- экспортирует итоговую таблицу в `output/maxqda_codebook.xlsx`.
+The goal is to produce a **practical, corpus-aware keyword list**: keep only terms (plus spelling variants and abbreviations) that actually occur in your documents, and export them in a MAXQDA-friendly format.
 
-## Утилитарная ценность (зачем это нужно)
-- **Для исследователя/аналитика**: меньше ручной работы при подготовке словаря/кодовой структуры для MAXQDA и меньше “шума” — в итог попадают только релевантные термины.
-- **Для программиста/методолога**: воспроизводимый пайплайн, который можно адаптировать под свою структуру кодбука, правила нормализации и пороги фильтрации.
+## What the pipeline does
+By default, the pipeline is **offline and LLM-free**:
+- Normalizes and expands the source codebook (spelling variants, parentheses, hyphens, MeSH-like patterns).
+- Mines abbreviations from the PDF corpus (Schwartz & Hearst-like heuristics).
+- Optionally enriches the codebook with mined abbreviations (including a chemistry branch, if applicable).
+- Performs **exact matching** of codebook terms against document text.
+- Exports the final table to `output/maxqda_codebook.xlsx`.
+
+## Why this is useful
+- **For MAXQDA users (researchers/analysts):** less manual work and fewer noisy terms in the final dictionary.
+- **For developers/methodologists:** a reproducible pipeline that can be tuned (normalization, thresholds, matching strategy).
 
 ---
 
-## Для пользователей (MAXQDA / исследователи)
+## For MAXQDA users (researchers)
 
-### Что умеет (возможности)
-- Принимает папку с документами (`primery/`) и кодбук (`codebook/common_without_brackets.xlsx`).
-- Автоматически формирует итоговый файл: `output/maxqda_codebook.xlsx`.
-- Поддерживает PDF и TXT.
-- Учитывает варианты написания терминов (скобки, дефисы, слеши, пунктуация, пробелы, некоторые “квалификаторы”).
-- Извлекает аббревиатуры из корпуса и сохраняет их в CSV (для контроля/аудита).
-- Сохраняет промежуточные файлы кодбука (удобно для проверки качества на каждом этапе).
+### Features
+- Input: `primery/` (documents) + `codebook/common_without_brackets.xlsx` (source codebook).
+- Output: `output/maxqda_codebook.xlsx` (ready to import into MAXQDA).
+- Supports PDF and TXT.
+- Generates common term variants (punctuation, hyphenation, parentheses, qualifiers).
+- Saves intermediate artifacts in `codebook/` for review/auditing.
 
-### Быстрый старт (Windows)
-1) Скопируйте PDF/TXT в папку `primery/`.
-2) Убедитесь, что исходный кодбук лежит в `codebook/common_without_brackets.xlsx`.
-3) Запустите пайплайн:
+### Quick start (Windows)
+1) Put your PDF/TXT files into `primery/`.
+2) Ensure your source codebook is at `codebook/common_without_brackets.xlsx` (required columns: `Category`, `Search item`).
+3) Run:
    - `run_pipeline.bat`
-4) Готовый файл появится здесь:
+4) Result:
    - `output/maxqda_codebook.xlsx`
 
-### Входные данные
-- `primery/` — документы `.pdf` и/или `.txt`.
-- `codebook/common_without_brackets.xlsx` — исходный кодбук (обязательные колонки: `Category`, `Search item`).
+### Inputs
+- `primery/`: `.pdf` and/or `.txt` documents (this folder is intentionally not tracked in git).
+- `codebook/common_without_brackets.xlsx`: source codebook.
 
-### Выходные данные
-- `output/maxqda_codebook.xlsx` — итоговая таблица для импорта в MAXQDA.
-- Промежуточные артефакты в `codebook/`:
-  - `codebook/common.cleaned.xlsx` — очищенный/нормализованный кодбук (варианты терминов).
-  - `codebook/abbrev_from_corpus.csv` — аббревиатуры, извлечённые из корпуса.
-  - `codebook/abbrev_kb.csv` — агрегированная “база знаний” по аббревиатурам.
-  - `codebook/common.cleaned.with_kb_abbrev.xlsx` — кодбук, обогащённый аббревиатурами из KB.
-  - `codebook/context_abbrev_predictions.csv` — предсказания контекстного классификатора (если сработал).
-  - `codebook/common.cleaned.with_context_abbrev.xlsx` — финальная версия кодбука перед сборкой словаря.
+### Outputs
+- `output/maxqda_codebook.xlsx`: final MAXQDA import file.
+- Intermediate files in `codebook/`:
+  - `codebook/common.cleaned.xlsx`
+  - `codebook/abbrev_from_corpus.csv`
+  - `codebook/abbrev_kb.csv`
+  - `codebook/common.cleaned.with_kb_abbrev.xlsx`
+  - `codebook/context_abbrev_predictions.csv`
+  - `codebook/common.cleaned.with_context_abbrev.xlsx`
 
-### Настройка “качества/строгости” (простыми словами)
-Порог частоты и максимальная длина фразы влияют на размер и “чистоту” итогового словаря:
-- `--min-frequency` (в `run_pipeline.bat`, шаг 5) — чем выше, тем меньше шумовых совпадений.
-- `--max-words` (шаг 5) — максимальная длина фразы при сопоставлении.
-
----
-
-## Для разработчиков (как устроено)
-
-### Архитектура пайплайна
-Пайплайн собирается батником `run_pipeline.bat` и состоит из 5 шагов:
-1) `preprocess_codebook.py`  
-   Нормализация кодбука + генерация вариантов терминов (в т.ч. агрессивнее для химии).
-2) `mine_abbreviations_schwartz_hearst.py`  
-   Извлечение пар *long form ↔ short form* из PDF (эвристики Schwartz & Hearst + варианты вида `IL-6`/`IL6`).
-3) `abbrev_knowledge_base.py`  
-   Агрегация аббревиатур в KB, фильтрация по частоте/уверенности и добавление аббревиатур в кодбук (при необходимости).
-4) `context_abbrev_classifier_patched.py`  
-   TF‑IDF + cosine similarity: классификация аббревиатур по контексту в сторону ветки химии (опционально добавляет 0 строк).
-5) `build_codebook.py`  
-   Exact‑match по корпусу и экспорт в MAXQDA‑совместимый XLSX через функции из `extract_medical_terms.py`.
-
-### Установка и окружение
-- `setup_env.bat` — создаёт виртуальное окружение в `libs/venv` и ставит зависимости из `requirements.txt`.
-- Зависимости: `pandas`, `openpyxl`, `PyPDF2`, `scikit-learn`, `python-dotenv`.
-
-### Основные “точки расширения”
-- Нормализация и генерация вариантов терминов: `preprocess_codebook.py`.
-- Аббревиатуры и фильтры (частота/длина/бан‑листы): `mine_abbreviations_schwartz_hearst.py`, `abbrev_knowledge_base.py`.
-- Контекстная модель для аббревиатур: `context_abbrev_classifier_patched.py`.
-- Механика сопоставления и экспорт: `extract_medical_terms.py` (`build_codebook_index`, `run_exact_codebook_match`, `export_to_maxqda_format`).
-
-### Дополнительно: режимы с LLM (не обязательны)
-`extract_medical_terms.py` поддерживает режимы `hybrid` и `llm-only` (через OpenAI), но **основной пайплайн проекта их не использует**.  
-Если вы хотите включить LLM‑режимы — добавьте `OPENAI_API_KEY` в `.env` и установите пакет `openai`.
+### Tuning “strictness”
+The most important knobs are in step 5 of `run_pipeline.bat`:
+- `--min-frequency`: higher means fewer low-signal matches.
+- `--max-words`: maximum phrase length used during matching.
 
 ---
 
-## Структура репозитория
-- `primery/` — входной корпус PDF/TXT
-- `codebook/` — исходный и промежуточные кодбуки/CSV
-- `output/` — итоговые файлы для импорта в MAXQDA
-- `libs/venv/` — виртуальное окружение (создаётся автоматически)
-- `run_pipeline.bat` — запуск “от начала до конца”
-- `setup_env.bat` — подготовка окружения
+## For developers
+
+### Pipeline overview
+The pipeline is orchestrated by `run_pipeline.bat` and runs these scripts:
+1) `preprocess_codebook.py` - normalize codebook + generate variants.
+2) `mine_abbreviations_schwartz_hearst.py` - mine abbreviation pairs from PDFs.
+3) `abbrev_knowledge_base.py` - aggregate/filter abbreviations + optionally enrich codebook.
+4) `context_abbrev_classifier_patched.py` - TF-IDF + cosine similarity context classifier (may add 0 rows).
+5) `build_codebook.py` - exact-match against corpus + export via `extract_medical_terms.py`.
+
+### Environment
+- `setup_env.bat` creates `libs/venv` and installs dependencies from `requirements.txt`.
+- Main dependencies: `pandas`, `openpyxl`, `PyPDF2`, `scikit-learn`, `python-dotenv`.
+
+### Extension points
+- Term normalization/variants: `preprocess_codebook.py`.
+- Abbreviation mining and filters: `mine_abbreviations_schwartz_hearst.py`, `abbrev_knowledge_base.py`.
+- Context classifier: `context_abbrev_classifier_patched.py`.
+- Matching + export: `extract_medical_terms.py` (`build_codebook_index`, `run_exact_codebook_match`, `export_to_maxqda_format`).
+
+### Optional LLM modes (not used by default)
+`extract_medical_terms.py` also contains `hybrid` and `llm-only` modes via OpenAI, but the default pipeline is designed to be LLM-free.
+To enable LLM modes, set `OPENAI_API_KEY` in `.env` and install the `openai` package.
 
 ---
 
-## Частые вопросы / troubleshooting
-- `Multiple definitions in dictionary ... /F13`  
-  Это предупреждение от `PyPDF2` на некоторых PDF (шрифты/словари). Обычно не критично и не мешает извлечению текста.
-- Если итоговый файл пустой или слишком маленький  
-  Проверьте пороги `--min-frequency` и `--max-words`, а также качество извлечения текста из PDF (некоторые PDF могут быть сканами без текста).
+## Repository layout
+- `primery/`: input corpus (PDF/TXT) - empty in git, add locally
+- `codebook/`: source and generated codebooks/CSVs
+- `output/`: generated MAXQDA import files
+- `libs/venv/`: local virtual environment (created automatically)
+- `run_pipeline.bat`: end-to-end pipeline
+- `setup_env.bat`: environment bootstrap
 
 ---
 
-## Лицензия
-Проект распространяется под лицензией MIT — см. `LICENSE`.
+## Troubleshooting
+- `Multiple definitions in dictionary ... /F13`
+  - This is a `PyPDF2` warning for some PDFs (fonts/dictionaries). It is usually harmless.
+- Output is empty or too small
+  - Check `--min-frequency` and `--max-words`, and verify that your PDFs contain extractable text (scanned PDFs may require OCR).
 
-## Участие в разработке
-Правила и процесс — в `CONTRIBUTING.md`.
+---
+
+## License
+MIT License. See `LICENSE`.
+
+## Contributing
+See `CONTRIBUTING.md`.
 
 ## Code of Conduct
-Правила общения в сообществе — в `CODE_OF_CONDUCT.md`.
+See `CODE_OF_CONDUCT.md`.
 
 ## Security
-Как сообщать об уязвимостях — в `SECURITY.md`.
+See `SECURITY.md`.
 
-## Версии и релизы
-- Семантическое версионирование (SemVer): теги вида `vX.Y.Z`
-- История изменений: `CHANGELOG.md`
+## Versioning and releases
+- Semantic Versioning (SemVer): tags like `vX.Y.Z`
+- Changelog: `CHANGELOG.md`
+

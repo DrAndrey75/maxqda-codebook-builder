@@ -1,0 +1,42 @@
+name: Feature request
+description: Предложить улучшение или новую функцию
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Опишите задачу и ожидаемый результат — это помогает согласовать дизайн и приоритет.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какая проблема/потребность?
+      placeholder: Хочу поддержать ... потому что ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое решение
+      placeholder: Добавить флаг/режим/скрипт, который ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      placeholder: Другие варианты реализации или обходные пути.
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Дополнительный контекст
+      placeholder: Примеры, ссылки, ограничения по данным.
+    validations:
+      required: false
+

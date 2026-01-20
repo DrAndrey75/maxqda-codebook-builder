@@ -1,0 +1,5 @@
+pandas
+openpyxl
+PyPDF2
+scikit-learn
+python-dotenv

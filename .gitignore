@@ -205,3 +205,19 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ----------------------- Project-specific ignores ----------------------- #
+# Local venv created by setup_env.bat / run_pipeline.bat
+libs/
+
+# Input corpus (PDF/TXT) is usually large and/or copyrighted; keep folder but not contents
+primery/*
+!primery/.gitkeep
+
+# Generated outputs
+output/*
+!output/.gitkeep
+
+# Generated codebook artifacts (keep only the source codebook)
+codebook/*
+!codebook/common_without_brackets.xlsx

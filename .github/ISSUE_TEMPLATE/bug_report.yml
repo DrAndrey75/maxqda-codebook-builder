@@ -1,0 +1,89 @@
+name: Bug report
+description: Сообщить о воспроизводимой ошибке
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо! Чем точнее описание, тем быстрее можно воспроизвести и исправить проблему.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Что произошло?
+      description: Коротко опишите проблему.
+      placeholder: Пайплайн завершается без файла в output/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги для воспроизведения
+      description: Команды/батники + входные данные (минимальный пример приветствуется).
+      placeholder: |
+        1) setup_env.bat
+        2) run_pipeline.bat
+        3) ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+      placeholder: Должен появиться output/maxqda_codebook.xlsx
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение
+      placeholder: Файл не создаётся, появляется ошибка...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи/ошибка (стектрейс)
+      description: Вставьте полный вывод (если большой — приложите ключевые фрагменты).
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: os
+    attributes:
+      label: ОС
+      placeholder: Windows 11 / macOS / Ubuntu ...
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python
+      placeholder: "python --version"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия проекта
+      description: Тег релиза (например v0.1.0) или хеш коммита.
+      placeholder: v0.1.0 или abcdef1
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Дополнительный контекст
+      description: Примеры входных данных, особенности PDF (сканы без текста), любые детали.
+    validations:
+      required: false
+
